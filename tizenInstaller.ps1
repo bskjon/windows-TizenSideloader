@@ -7,7 +7,28 @@ $package = $null
 
 $targetPattern = '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]):[0-9]+'
 
+$ContentObj = @"
+public class Device
+{
+    public string Ip {get; set;}
+    public string Port {get; set;}
+    public string State {get; set;}
+    public string Name {get; set;}
 
+    public Device(string name, string ip, string port, string state)
+    {
+        this.Name = name;
+        this.Ip = ip;
+        this.Port = port;
+        this.State = state;
+    }
+
+}
+"@
+
+Add-Type -TypeDefinition $ContentObj -ErrorAction SilentlyContinue;
+
+Clear-Host
 
 
 function getInstallPackage()
@@ -32,33 +53,6 @@ if ($null -eq $package)
     getInstallPackage
 }
 
-
-
-
-
-
-
-
-$ContentObj = @"
-public class Device
-{
-    public string Ip {get; set;}
-    public string Port {get; set;}
-    public string State {get; set;}
-    public string Name {get; set;}
-
-    public Device(string name, string ip, string port, string state)
-    {
-        this.Name = name;
-        this.Ip = ip;
-        this.Port = port;
-        this.State = state;
-    }
-
-}
-"@
-
-Add-Type -TypeDefinition $ContentObj -ErrorAction SilentlyContinue;
 
 $files = Get-ChildItem -Recurse -Path $pwd
 #Write-Host $files;
@@ -97,6 +91,10 @@ foreach ($device in $potentialDevices)
     {
         for ($i = 0; $i -le $ct.Count; $i++)
         {
+            if ($ct[$i] -eq $null)
+            {
+                continue
+            }
             if ($ct[$i].ToLower() -match "connected")
             {
                 $sdbConnectedDevices += $device.IPAddress
